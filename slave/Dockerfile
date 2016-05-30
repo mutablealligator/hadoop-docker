@@ -71,8 +71,8 @@ RUN chmod 700 /etc/bootstrap.sh
 ENV BOOTSTRAP /etc/bootstrap.sh
 
 # Add slaves information
-# ADD files/slaves /usr/local/hadoop/etc/hadoop/slaves
-# ADD files/masters /usr/local/hadoop/etc/hadoop/masters
+ADD files/slaves /usr/local/hadoop/etc/hadoop/slaves
+ADD files/masters /usr/local/hadoop/etc/hadoop/masters
 
 # workingaround docker.io build error
 RUN ls -la /usr/local/hadoop/etc/hadoop/*-env.sh

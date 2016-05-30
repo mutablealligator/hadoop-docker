@@ -23,6 +23,9 @@ $HADOOP_PREFIX/sbin/mr-jobhistory-daemon.sh --config $HADOOP_CONF_DIR start hist
 $HADOOP_PREFIX/bin/hdfs dfs -mkdir -p /user/root
 echo "DFS and YARN started..."
 
+ping slave0.vbk.com
+ping slave1.vbk.com
+
 if [[ $1 = "-d" ]]; then
   while true; do sleep 1000; done
 fi

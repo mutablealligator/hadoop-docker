@@ -75,6 +75,7 @@ RUN chmod 700 $HADOOP_PREFIX/runjob.sh
 
 # Add slaves information
 ADD files/slaves $HADOOP_PREFIX/etc/hadoop/slaves
+ADD files/masters $HADOOP_PREFIX/etc/hadoop/masters
 
 # Add jar and input files
 RUN mkdir $HADOOP_PREFIX/bigram

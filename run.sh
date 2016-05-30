@@ -31,15 +31,15 @@ i=0
 while [ $i -lt $N ]
 do
     echo "Start slave$i container..."
-    docker run -itd --net=vbknetwork --name slave$i -h slave$i.vbk.com hd/slave /etc/bootstrap.sh -bash
+    docker run -itd --net=vbknetwork --name slave$i -h slave$i.vbk.com -e JOIN_IP=$FIRST_IP hd/slave /etc/bootstrap.sh -d
     i=$(( $i + 1 ))
 done
 
 echo "Containers created:"
 docker ps -a
 
-echo "Waiting for 50 seconds..."
-sleep 50
+echo "Waiting for 60 seconds..."
+sleep 60
 
 docker exec -it master /bin/bash /usr/local/hadoop/bin/hdfs dfsadmin -report
 docker exec -it master /bin/bash /usr/local/hadoop/runjob.sh
