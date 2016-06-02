@@ -11,7 +11,7 @@ bin/hdfs dfs -put bigram .
 bin/hdfs dfs -cat bigram/input.txt
 
 #bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.1.jar wordcount bigram/input.txt wordCntRes
-bin/hadoop jar bigram/bigram.jar BigramCount bigram/input.txt wordCntRes
+bin/hadoop jar bigram/bigram.jar BigramCount bigram/input.txt wordCntRes 4
 bin/hdfs dfs -ls wordCntRes
 bin/hdfs dfs -cat wordCntRes/part-r-00000
 
