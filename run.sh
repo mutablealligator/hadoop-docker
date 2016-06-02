@@ -20,10 +20,9 @@ echo "Creating network"
 docker network create vbknetwork
 
 echo "Starting master..."
-docker run -itd --net=vbknetwork --name master -h master.vbk.com hd/master /etc/bootstrap.sh -bash
+docker run -itd --net=vbknetwork --name master -h master hd/master /etc/bootstrap.sh -bash
 echo "Container started with name 'master'"
 
-FIRST_IP=$(docker inspect --format="{{.NetworkSettings.IPAddress}}" master)
 echo "IP Address of master is : $FIRST_IP"
 
 N=4
@@ -31,7 +30,7 @@ i=0
 while [ $i -lt $N ]
 do
     echo "Start slave$i container..."
-    docker run -itd --net=vbknetwork --name slave$i -h slave$i.vbk.com -e JOIN_IP=$FIRST_IP hd/slave /etc/bootstrap.sh -d
+    docker run -itd --net=vbknetwork --name slave$i -h slave$i  hd/slave /etc/bootstrap.sh -d
     i=$(( $i + 1 ))
 done
 
@@ -43,10 +42,6 @@ sleep 60
 
 docker exec -it master /bin/bash /usr/local/hadoop/bin/hdfs dfsadmin -report
 docker exec -it master /bin/bash /usr/local/hadoop/runjob.sh
-
-#docker exec -it master cd $HADOOP_PREFIX
-#docker exec -it master bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.1.jar grep input output 'dfs[a-z.]+'
-#docker exec -it master bin/hdfs dfs -cat output/*
 
 echo "Stopping and cleaning up containers..."
 

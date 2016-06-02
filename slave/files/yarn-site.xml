@@ -29,4 +29,9 @@
     <value>600</value>
   </property>
 
+  <property>
+        <name>yarn.resourcemanager.hostname</name>
+        <value>master</value>
+  </property>
+
 </configuration>

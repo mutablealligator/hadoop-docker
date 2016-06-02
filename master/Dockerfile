@@ -49,12 +49,19 @@ RUN mkdir $HADOOP_PREFIX/input
 RUN cp $HADOOP_PREFIX/etc/hadoop/*.xml $HADOOP_PREFIX/input
 
 # pseudo distributed
-ADD files/core-site.xml.template $HADOOP_PREFIX/etc/hadoop/core-site.xml.template
-RUN sed s/HOSTNAME/localhost/ /usr/local/hadoop/etc/hadoop/core-site.xml.template > /usr/local/hadoop/etc/hadoop/core-site.xml
+ADD files/core-site.xml $HADOOP_PREFIX/etc/hadoop/core-site.xml
 ADD files/hdfs-site.xml $HADOOP_PREFIX/etc/hadoop/hdfs-site.xml
 
 ADD files/mapred-site.xml $HADOOP_PREFIX/etc/hadoop/mapred-site.xml
 ADD files/yarn-site.xml $HADOOP_PREFIX/etc/hadoop/yarn-site.xml
+ADD files/slaves $HADOOP_PREFIX/etc/hadoop/slaves
+
+RUN mkdir $HADOOP_PREFIX/bigram
+ADD bigram $HADOOP_PREFIX/bigram
+
+ADD files/runjob.sh $HADOOP_PREFIX/runjob.sh
+RUN chown root:root $HADOOP_PREFIX/runjob.sh
+RUN chmod 700 $HADOOP_PREFIX/runjob.sh
 
 # fixing the libhadoop.so like a boss
 RUN rm -rf /usr/local/hadoop/lib/native
@@ -68,19 +75,6 @@ ADD files/bootstrap.sh /etc/bootstrap.sh
 RUN chown root:root /etc/bootstrap.sh
 RUN chmod 700 /etc/bootstrap.sh
 ENV BOOTSTRAP /etc/bootstrap.sh
-
-ADD files/runjob.sh $HADOOP_PREFIX/runjob.sh
-RUN chown root:root $HADOOP_PREFIX/runjob.sh
-RUN chmod 700 $HADOOP_PREFIX/runjob.sh
-
-# Add slaves information
-ADD files/slaves $HADOOP_PREFIX/etc/hadoop/slaves
-ADD files/masters $HADOOP_PREFIX/etc/hadoop/masters
-
-# Add jar and input files
-RUN mkdir $HADOOP_PREFIX/bigram
-ADD bigram $HADOOP_PREFIX/bigram
-RUN chmod 777 $HADOOP_PREFIX/bigram
 
 # workingaround docker.io build error
 RUN ls -la /usr/local/hadoop/etc/hadoop/*-env.sh

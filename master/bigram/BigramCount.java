@@ -37,7 +37,7 @@ public class BigramCount extends Configured implements Tool {
 
         if (previous != null) {
           bg.set(previous + " " + cur);
-          context.write(bg, 1);
+          context.write(bg, one);
         }
         previous = cur;
       }

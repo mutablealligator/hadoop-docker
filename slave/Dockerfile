@@ -49,8 +49,7 @@ RUN mkdir $HADOOP_PREFIX/input
 RUN cp $HADOOP_PREFIX/etc/hadoop/*.xml $HADOOP_PREFIX/input
 
 # pseudo distributed
-ADD files/core-site.xml.template $HADOOP_PREFIX/etc/hadoop/core-site.xml.template
-RUN sed s/HOSTNAME/localhost/ /usr/local/hadoop/etc/hadoop/core-site.xml.template > /usr/local/hadoop/etc/hadoop/core-site.xml
+ADD files/core-site.xml $HADOOP_PREFIX/etc/hadoop/core-site.xml
 ADD files/hdfs-site.xml $HADOOP_PREFIX/etc/hadoop/hdfs-site.xml
 
 ADD files/mapred-site.xml $HADOOP_PREFIX/etc/hadoop/mapred-site.xml
@@ -69,10 +68,6 @@ RUN chown root:root /etc/bootstrap.sh
 RUN chmod 700 /etc/bootstrap.sh
 
 ENV BOOTSTRAP /etc/bootstrap.sh
-
-# Add slaves information
-ADD files/slaves /usr/local/hadoop/etc/hadoop/slaves
-ADD files/masters /usr/local/hadoop/etc/hadoop/masters
 
 # workingaround docker.io build error
 RUN ls -la /usr/local/hadoop/etc/hadoop/*-env.sh
