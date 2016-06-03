@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 import java.util.*;
 import java.io.*;
 
-import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -147,7 +147,7 @@ public class BigramCount extends Configured implements Tool {
 
 		HashMap<String, Integer> bigramCountMap = new HashMap<String, Integer>();
 		Path outputPath = new Path(args[1]);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(FileSystem.get(new Configured().getConf()).open(outputPath)));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(FileSystem.get(new Configuration()).open(outputPath)));
 		String line = reader.readLine();
 		int totalBigramOccurrences = 0;
 		while (line != null) {
