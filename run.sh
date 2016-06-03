@@ -23,8 +23,6 @@ echo "Starting master..."
 docker run -itd --net=vbknetwork --name master -h master hd/master /etc/bootstrap.sh -bash
 echo "Container started with name 'master'"
 
-echo "IP Address of master is : $FIRST_IP"
-
 N=4
 i=0
 while [ $i -lt $N ]

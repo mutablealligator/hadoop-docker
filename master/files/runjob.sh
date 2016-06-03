@@ -8,12 +8,26 @@ cd $HADOOP_PREFIX
 bin/hdfs dfs -mkdir -p /user/root
 bin/hdfs dfs -put bigram .
 
-bin/hdfs dfs -cat bigram/input-larger.txt
+bin/hdfs dfs -cat bigram/input.txt
 
 #bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.1.jar wordcount bigram/input.txt wordCntRes
-bin/hadoop jar bigram/bigram.jar BigramCount bigram/input-larger.txt wordCntRes 4
+bin/hadoop jar bigram/bigram.jar BigramCount bigram/input.txt wordCntRes 4
+#bin/hadoop jar bigram/wc.jar WordCount bigram/input.txt wordCntRes 4
+
+echo "Outputs are at : "
 bin/hdfs dfs -ls wordCntRes
+
+echo "File0"
 bin/hdfs dfs -cat wordCntRes/part-r-00000
+
+echo "File1"
+bin/hdfs dfs -cat wordCntRes/part-r-00001
+
+echo "File2"
+bin/hdfs dfs -cat wordCntRes/part-r-00002
+
+echo "File3"
+bin/hdfs dfs -cat wordCntRes/part-r-00003
 
 <<"COMMENT"
   echo "Compiling Wordcount code and creating jar..."

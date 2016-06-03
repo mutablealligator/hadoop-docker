@@ -1,16 +1,17 @@
-import java.util.List;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.StringTokenizer;
 import java.util.Map.Entry;
-import java.util.*;
-import java.io.*;
+import java.util.StringTokenizer;
 
-import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -20,19 +21,16 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-import org.apache.hadoop.util.Tool;
-import org.apache.hadoop.util.ToolRunner;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.log4j.Logger;
 
-public class BigramCount extends Configured implements Tool {
+public class BigramCount {
 	private static final Logger LOG = Logger.getLogger(BigramCount.class);
 
-	protected static class MyMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+	protected static class MyMapper extends Mapper<LongWritable, Text, Text, IntWritable>  {
 		private static final IntWritable one = new IntWritable(1);
 		private static final Text bg = new Text();
 
-		@Override
 		public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 			String line = value.toString();
 
@@ -40,9 +38,8 @@ public class BigramCount extends Configured implements Tool {
 			StringTokenizer itr = new StringTokenizer(line);
 			while (itr.hasMoreTokens()) {
 				String cur = itr.nextToken();
-
 				if (previous != null) {
-					bg.set(previous + " " + cur);
+					bg.set(previous + "|" + cur);
 					context.write(bg, one);
 				}
 				previous = cur;
@@ -53,7 +50,6 @@ public class BigramCount extends Configured implements Tool {
 	protected static class MyReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
 		private final static IntWritable SUM = new IntWritable();
 
-		@Override
 		public void reduce(Text key, Iterable<IntWritable> values, Context context)
 				throws IOException, InterruptedException {
 			int sum = 0;
@@ -75,21 +71,21 @@ public class BigramCount extends Configured implements Tool {
 			String param = args[i];
 			System.out.println(param);
 		}
-		ToolRunner.printGenericCommandUsage(System.out);
+		//ToolRunner.printGenericCommandUsage(System.out);
 		return -1;
 	}
 
-	public int run(String[] args) throws Exception {
+	public static void run(String[] args, Configuration conf) throws Exception {
 		if (args.length != 3) {
 			printUsage(args);
-			return -1;
+			return;
 		}
 
 		String inputPath = args[0];
 		String outputPath = args[1];
 		int reduceTasks = Integer.parseInt(args[2]);
 
-		Job job = Job.getInstance(getConf());
+		Job job = Job.getInstance(conf);
 		job.setJobName(BigramCount.class.getSimpleName());
 		job.setJarByClass(BigramCount.class);
 
@@ -102,20 +98,23 @@ public class BigramCount extends Configured implements Tool {
 		job.setMapOutputValueClass(IntWritable.class);
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
-		job.setOutputFormatClass(SequenceFileOutputFormat.class);
+		job.setOutputFormatClass(TextOutputFormat.class);
 
 		job.setMapperClass(MyMapper.class);
 		job.setCombinerClass(MyReducer.class);
 		job.setReducerClass(MyReducer.class);
 
 		Path outputDir = new Path(outputPath);
-		FileSystem.get(getConf()).delete(outputDir, true);
+		FileSystem.get(conf).delete(outputDir, true);
 
 		long startTime = System.currentTimeMillis();
-		job.waitForCompletion(true);
-		System.out.println("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
+		boolean ret = job.waitForCompletion(true);
+		if(ret) {
+			System.out.println("Job Finished in " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
+		} else {
+			System.err.println("Job Failed to Complete!");
+		}
 
-		return 0;
 	}
 
 	static ArrayList<Entry<String, Integer>> entriesSortedByValues(HashMap<String, Integer> map) {
@@ -140,22 +139,27 @@ public class BigramCount extends Configured implements Tool {
 		return sortedEntries;
 	}
 
-	/**
-	 * Dispatches command-line arguments to the tool via the {@code ToolRunner}.
-	 */
 	public static void main(String[] args) throws Exception {
-		ToolRunner.run(new BigramCount(), args);
 
+		Configuration conf = new Configuration();
+		run(args, conf);
+		
 		HashMap<String, Integer> bigramCountMap = new HashMap<String, Integer>();
 		Path outputPath = new Path(args[1]);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(FileSystem.get(new Configuration()).open(outputPath)));
+		
+		FileSystem hdfs = FileSystem.get(conf);
+		Path outpath = new Path("bigram-result.txt");
+	        FileUtil.copyMerge(hdfs, outputPath, hdfs, outpath, false, conf, "");
+		
+		BufferedReader reader = new BufferedReader(new InputStreamReader(FileSystem.get(conf).open(outpath)));
 		String line = reader.readLine();
 		int totalBigramOccurrences = 0;
 		while (line != null) {
-			//System.out.println(line);
-			String[] kvTokens = line.trim().split(" ");
-			String bigram = kvTokens[0] + " " + kvTokens[1];
-			int count = Integer.parseInt(kvTokens[2]);
+			System.out.println(line);
+			String[] kvTokens = line.trim().split("[ \t\n\f\r]");
+			String bigram = kvTokens[0];
+			System.out.println(bigram);
+			int count = Integer.parseInt(kvTokens[1]);
 			totalBigramOccurrences += count;
 			bigramCountMap.put(bigram, new Integer(count));
 			line = reader.readLine();
