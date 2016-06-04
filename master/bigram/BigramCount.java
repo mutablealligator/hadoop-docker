@@ -149,16 +149,15 @@ public class BigramCount {
 		
 		FileSystem hdfs = FileSystem.get(conf);
 		Path outpath = new Path("bigram-result.txt");
-	        FileUtil.copyMerge(hdfs, outputPath, hdfs, outpath, false, conf, "");
+	    FileUtil.copyMerge(hdfs, outputPath, hdfs, outpath, false, conf, "");
 		
 		BufferedReader reader = new BufferedReader(new InputStreamReader(FileSystem.get(conf).open(outpath)));
 		String line = reader.readLine();
 		int totalBigramOccurrences = 0;
 		while (line != null) {
-			System.out.println(line);
+			//System.out.println(line);
 			String[] kvTokens = line.trim().split("[ \t\n\f\r]");
 			String bigram = kvTokens[0];
-			System.out.println(bigram);
 			int count = Integer.parseInt(kvTokens[1]);
 			totalBigramOccurrences += count;
 			bigramCountMap.put(bigram, new Integer(count));
@@ -168,13 +167,14 @@ public class BigramCount {
 		
 		ArrayList<Entry<String, Integer>> sortedEntries = entriesSortedByValues(bigramCountMap);
 		
-		System.out.println("Sorted Bigram Entries (Descending Popularity):-");
+		/*System.out.println("Sorted Bigram Entries (Descending Popularity):-");
 		for (Entry<String, Integer> entry : sortedEntries) {
 			System.out.println("< " + entry.getKey() + " : " + entry.getValue().intValue() + " >");
-		}
+		}*/
 		System.out.println("\n\n");
 		System.out.println("Total Bigram Occurrences: " + totalBigramOccurrences);
-		System.out.println("Most Popular Bigram: " + sortedEntries.get(0).getKey());
+        String[] popularBigram = sortedEntries.get(0).getKey().split("\\|");
+		System.out.println("Most Popular Bigram: ( " + popularBigram[0] + " : " + popularBigram[1] + " )");
 		
 		int totalTopN = 0;
 		int topN = 0;
@@ -182,11 +182,12 @@ public class BigramCount {
 			totalTopN += entry.getValue().intValue();
 			topN++;
 			
-			if(totalTopN >= (int)(0.1 * (float)(totalBigramOccurrences))) {
+			if(totalTopN >= (int)(0.1 * (double)(totalBigramOccurrences))) {
 				break;
 			}
 		}
 		
-		System.out.println("Number of Top-N Bigrams <= 10% of all bigram counts: " + topN);
+		System.out.println("Number of Top-N Bigrams for 10% of all bigram counts: " + topN);
+		System.out.println("\n\n");
 	}
 }

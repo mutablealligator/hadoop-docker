@@ -14,7 +14,7 @@ docker build -t hd/slave .
 cd ..
 
 echo "Image created for master and slave"
-docker images
+#docker images
 
 echo "Creating network"
 docker network create vbknetwork
@@ -32,10 +32,10 @@ do
     i=$(( $i + 1 ))
 done
 
-echo "Containers created:"
-docker ps -a
+echo "Containers created."
+#docker ps -a
 
-echo "Waiting for 60 seconds..."
+echo "Waiting for 60 seconds for Hadoop Cluster to setup and HDFS to synchronize..."
 sleep 60
 
 docker exec -it master /bin/bash /usr/local/hadoop/bin/hdfs dfsadmin -report
@@ -62,3 +62,5 @@ docker network rm vbknetwork
 
 #docker-machine stop vbk
 #docker-machine rm -y vbk
+
+echo "Done. Bye!"
