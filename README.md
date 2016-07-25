@@ -4,8 +4,8 @@ README
 
 Project Members
 ---------------
-Dhruv Sharma - A53101868 - dhsharma@cs.ucsd.edu
-Karthikeyan Vasuki Balasubramaniam - A53094942 - kvasukib@ucsd.edu
+Dhruv Sharma - dhsharma@cs.ucsd.edu
+Karthikeyan Vasuki Balasubramaniam - kvasukib@ucsd.edu
 
 
 Instructions for Execution
